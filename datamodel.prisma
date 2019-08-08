@@ -19,8 +19,10 @@ type Application @db(name: "application") {
   wakilId: Person! @db(name: "wakil_id")
   waktuPernahKlien: String @db(name: "waktu_pernah_klien")
   whyLbh: String @db(name: "why_lbh")
-  case: Case! @relation(link: INLINE)
+  case: Case @relation(link: INLINE)
   clients: [Client!]!
+  tahap: String
+  status: String
 }
 
 type Case @db(name: "case") {
@@ -49,11 +51,14 @@ type Case @db(name: "case") {
   issues: [CaseIssue!]!
   korbans: [CaseKorban]
   pelakus: [CasePelaku]
-  pks: [CasePk!]!
-  progresses: [CaseProgress!]!
+  pk: CasePk @relation(link: INLINE) 
+  progresses: CaseProgress @relation(link: INLINE)
   activities: [CaseProgressActivity!]!
   transferreferrals: [CaseTransferReferral!]!
   violatedrights: [CaseViolatedRight!]!
+  logRequests: [LogRequest] 
+  transfer: CaseTransfer @relation(link: INLINE) 
+  referrals: [CaseReferral] 
 }
 
 type CaseClassification @db(name: "case_classification") {
@@ -69,6 +74,9 @@ type CaseConsultation @db(name: "case_consultation") {
   createdAt: DateTime! @createdAt @db(name: "created_at")
   createdBy: String @db(name: "created_by")
   isiKonsul: String @db(name: "isi_konsul")
+  harapan: String
+  saranHukum: String
+  rencanaTindakLanjut: String
   judulAktifitas: String @db(name: "judul_aktifitas")
   ppKonsul: String @db(name: "pp_konsul")
   tglKonsul: DateTime @db(name: "tgl_konsul")
@@ -79,7 +87,7 @@ type CaseConsultation @db(name: "case_consultation") {
 
 type CaseConsultationApp @db(name: "case_consultation_app") {
   id: Int! @id
-  appConsultation: String @db(name: "app_consultation")
+  appConsultation: User @db(name: "app_consultation")  @relation(name: "Appkonsul")
   caseConsultationId: CaseConsultation! @db(name: "case_consultation_id")
 }
 
@@ -119,10 +127,10 @@ type CasePk @db(name: "case_pk") {
   caseId: Case! @db(name: "case_id")
   createdAt: DateTime! @createdAt @db(name: "created_at")
   createdBy: String @db(name: "created_by")
-  didampingi: Boolean!
+  didampingi: String
   legalMemo: String @db(name: "legal_memo")
   notulaRapat: String @db(name: "notula_rapat")
-  ppPendamping: Int @db(name: "pp_pendamping")
+  ppPendamping: User
   statusAlasanTdk: String @db(name: "status_alasan_tdk")
   tglRapat: DateTime @db(name: "tgl_rapat")
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
@@ -184,6 +192,27 @@ type CaseTransferReferral @db(name: "case_transfer_referral") {
   updatedBy: String @db(name: "updated_by")
 }
 
+type CaseTransfer{
+  id: Int! @id 
+  caseId: Case! 
+  tglTransfer:DateTime
+catatan:String
+network:Network
+createdBy:String
+updatedBy: String
+}
+
+type CaseReferral{
+  id: Int! @id 
+  caseId: Case! @relation(link: INLINE) 
+  client: Person! 
+  tglTransfer:DateTime
+catatan:String
+network:Network
+createdBy:String
+updatedBy: String
+}
+
 type CaseViolatedRight @db(name: "case_violated_rights") {
   id: Int! @id
   caseId: Case! @db(name: "case_id")
@@ -218,6 +247,7 @@ type Client @db(name: "client") {
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   updatedBy: String @db(name: "updated_by")
   usiaSaatKlien: Int @db(name: "usia_saat_klien")
+  logRequests: [LogRequest]
 }
 
 type DaftarPengacara @db(name: "daftar_pengacara") {
@@ -252,15 +282,18 @@ type DataDictLocal @db(name: "data_dict_local") {
 
 type LogRequest @db(name: "log_request") {
   ID: Int! @id
-  caseId: Int @db(name: "case_id")
+  caseId: Case @db(name: "case_id") @relation(link: INLINE)
   isiRequest: String @db(name: "isi_request")
+  applicationId: Application @db(name: "application_id") @relation(link: INLINE)
   jenisRequest: String @db(name: "jenis_request")
-  networkId: Int @db(name: "network_id")
-  personId: Int @db(name: "person_id")
-  pp: Int
-  requestBy: Int @db(name: "request_by")
-  requestTo: Int @db(name: "request_to")
+  networkId: Network @db(name: "network_id") @relation(link: INLINE)
+  personId: Person @db(name: "person_id") 
+  pp: [LogRequestApp]
+  statusRequest: String
+  requestBy: User @db(name: "request_by")  @relation(name: "LogRequestBy")
+  requestTo: User @db(name: "request_to")  @relation(name: "LogRequestTo")
   tanggapanRequest: String @db(name: "tanggapan_request")
+  tanggapanRequestIsi: String
   tglExpired: DateTime @db(name: "tgl_expired")
   tglRequest: DateTime @db(name: "tgl_request")
   tglRespon: DateTime @db(name: "tgl_respon")
@@ -268,8 +301,8 @@ type LogRequest @db(name: "log_request") {
 
 type LogRequestApp @db(name: "log_request_app") {
   id: Int! @id
-  appConsultation: String @db(name: "app_consultation")
-  logRequestId: Int @db(name: "log_request_id")
+  appConsultation: User! @db(name: "app_consultation")
+  logRequestId: LogRequest @db(name: "log_request_id")  @relation(link: INLINE)
 }
 
 type MtVocab @db(name: "mt_vocab") {
@@ -300,6 +333,7 @@ type Network @db(name: "networks") {
   regencyId: Int @db(name: "regency_id")
   type: String
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
+  logRequests: [LogRequest]
 }
 
 type Person @db(name: "person") {
@@ -339,6 +373,7 @@ type Person @db(name: "person") {
   casepelakus: [CasePelaku!]!
   clients: [Client!]!
   documents: [PersonDocument!]!
+  logRequests: [LogRequest] 
 }
 
 type PersonDocument @db(name: "person_documents") {
@@ -352,9 +387,10 @@ type PersonDocument @db(name: "person_documents") {
 }
 
 type Role @db(name: "roles") {
+  createdAt: DateTime! @createdAt @db(name: "created_at")
   id: Int! @id
-  type: Int
-  userId: Int @db(name: "user_id")
+  userId: [User!]! 
+  type: RolesType! 
 }
 
 type User @db(name: "users") {
@@ -374,6 +410,10 @@ type User @db(name: "users") {
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   username: String
   profile: UserProfile! @relation(link: INLINE)
+  roles_type:  [Role] @relation(link: TABLE)
+  logRequestBy: [LogRequest] @relation(name: "LogRequestBy")
+  logRequestTo: [LogRequest] @relation(name: "LogRequestTo")
+  appConsultation: [LogRequestApp]
 }
 
 type UserProfile @db(name: "user_profiles") {
@@ -384,4 +424,10 @@ type UserProfile @db(name: "user_profiles") {
   photo: String
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   userId: User! @db(name: "user_id")
+}
+
+type RolesType @db(name: "roles_type") {
+  createdAt: DateTime! @createdAt @db(name: "created_at")
+  id: Int! @id
+  description: String
 }
