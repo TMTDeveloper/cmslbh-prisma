@@ -16,7 +16,7 @@ type Application @db(name: "application") {
   statusPerwakilan: String @db(name: "status_perwakilan")
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   updatedBy: String @db(name: "updated_by")
-  wakilId: Person! @db(name: "wakil_id")
+  wakilId: Person @db(name: "wakil_id")
   waktuPernahKlien: String @db(name: "waktu_pernah_klien")
   whyLbh: String @db(name: "why_lbh")
   case: Case @relation(link: INLINE)
@@ -130,6 +130,8 @@ type CasePk @db(name: "case_pk") {
   didampingi: String
   legalMemo: String @db(name: "legal_memo")
   notulaRapat: String @db(name: "notula_rapat")
+  targetAkhirAdvokasi: String @db(name:"target_akhir_advokasi")
+  strategiAdvokasi: String @db(name:"strategi_advokasi")
   ppPendamping: User
   statusAlasanTdk: String @db(name: "status_alasan_tdk")
   tglRapat: DateTime @db(name: "tgl_rapat")
@@ -162,19 +164,19 @@ type CaseProgressActivity @db(name: "case_progress_activity") {
   tglAktifitas: DateTime @db(name: "tgl_aktifitas")
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   updatedBy: String @db(name: "updated_by")
-  activitieslit: [CaseProgressActivityLit!]!
-  activitiesnonlit: [CaseProgressActivityNonlit!]!
+  activitieslit: [CaseProgressActivityLit]
+  activitiesnonlit: [CaseProgressActivityNonlit]
 }
 
 type CaseProgressActivityLit @db(name: "case_progress_activity_lit") {
   id: Int! @id
-  caseProgressActivityId: CaseProgressActivity! @db(name: "case_progress_activity_id")
+  caseProgressActivityId: CaseProgressActivity @db(name: "case_progress_activity_id")
   kodeMt: String @db(name: "kode_mt")
 }
 
 type CaseProgressActivityNonlit @db(name: "case_progress_activity_nonlit") {
   id: Int! @id
-  caseProgressActivityId: CaseProgressActivity! @db(name: "case_progress_activity_id")
+  caseProgressActivityId: CaseProgressActivity @db(name: "case_progress_activity_id")
   kodeMt: String @db(name: "kode_mt")
 }
 
