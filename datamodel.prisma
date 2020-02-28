@@ -100,6 +100,7 @@ type CaseDocument @db(name: "case_document") {
   judulDokumen: String @db(name: "judul_dokumen")
   keterangan: String
   link: String
+  filename: String
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   updatedBy: String @db(name: "updated_by")
 }
@@ -119,6 +120,7 @@ type CaseKorban @db(name: "case_korban") {
 type CasePelaku @db(name: "case_pelaku") {
   id: Int! @id
   caseId: Case! @db(name: "case_id")
+  jenisPelaku: String
   personId: Person @db(name: "person_id")
 }
 
@@ -299,6 +301,7 @@ type LogRequest @db(name: "log_request") {
   tglExpired: DateTime @db(name: "tgl_expired")
   tglRequest: DateTime @db(name: "tgl_request")
   tglRespon: DateTime @db(name: "tgl_respon")
+  updatedAt: DateTime @updatedAt @db(name: "updated_at")
 }
 
 type LogRequestApp @db(name: "log_request_app") {
@@ -334,6 +337,7 @@ type Network @db(name: "networks") {
   provinceId: Int @db(name: "province_id")
   regencyId: Int @db(name: "regency_id")
   type: String
+  status: String
   updatedAt: DateTime! @updatedAt @db(name: "updated_at")
   logRequests: [LogRequest]
 }
@@ -432,4 +436,28 @@ type RolesType @db(name: "roles_type") {
   createdAt: DateTime! @createdAt @db(name: "created_at")
   id: Int! @id
   description: String
+}
+
+type SrcAnalisa @db(name: "src_analisa") {
+  id: Int! @id
+  group: String
+  label: String
+  field: String
+  type: String
+  source: String
+  kode_list: String
+  alias: String
+}
+
+type SrcOperator @db(name: "src_operator") {
+  id: Int! @id
+  type: String
+  operator: String
+  label: String
+}
+
+type SrcTemplate @db(name: "src_template") {
+  id: Int! @id
+  name: String
+  template: String
 }
